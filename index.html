@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AG Admin Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Phosphor Icons for modern sleek icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Firebase Compat Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header" style="color: #f5a623;">
+                <i class="ph-fill ph-crown hexagon-icon"></i>
+                <h2 style="font-weight: 900; letter-spacing: 1px;">AG<span style="color:#fff;">VALLKEY</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard">
+                    <i class="ph ph-squares-four"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-target="create-user">
+                    <i class="ph ph-user-plus"></i> Create Player
+                </a>
+                <a href="#" class="nav-item" data-target="manage-users">
+                    <i class="ph ph-users"></i> Manage Players
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-bar">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" placeholder="Search players...">
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">A</div>
+                    <span>Super Admin</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="view-section active">
+                    <h1 class="page-title">System Overview</h1>
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <div class="stat-icon purple"><i class="ph ph-users"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Players</h3>
+                                <p id="totalPlayersCount">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-icon green"><i class="ph ph-coins"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Points Distributed</h3>
+                                <p id="totalPointsCount">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-icon blue"><i class="ph ph-chart-line-up"></i></div>
+                            <div class="stat-info">
+                                <h3>Active Today</h3>
+                                <p>0</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Create User Section -->
+                <section id="create-user" class="view-section">
+                    <h1 class="page-title">Register New Player</h1>
+                    <div class="glass-panel form-panel">
+                        <form id="createUserForm">
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <label>Username (Player ID)</label>
+                                    <div class="input-field">
+                                        <i class="ph ph-user"></i>
+                                        <input type="text" id="newUsername" required placeholder="e.g. player_777">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Password</label>
+                                    <div class="input-field">
+                                        <i class="ph ph-lock-key"></i>
+                                        <input type="password" id="newPassword" required
+                                            placeholder="Choose a secure password">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group full-width">
+                                <label>Initial Deposit (Points)</label>
+                                <div class="input-field">
+                                    <i class="ph ph-coin"></i>
+                                    <input type="number" id="initialPoints" min="0" value="0" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary glow-btn">
+                                <i class="ph ph-user-circle-plus"></i> Create Player Account
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Manage Users Section -->
+                <section id="manage-users" class="view-section">
+                    <h1 class="page-title">Player Management</h1>
+                    <div class="glass-panel table-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Player ID</th>
+                                    <th>Password</th>
+                                    <th>Current Balance</th>
+                                    <th>Created On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <!-- Users injected here via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for sending points -->
+    <div id="pointsModal" class="modal-overlay">
+        <div class="modal-content glass">
+            <button class="close-modal"><i class="ph ph-x"></i></button>
+            <h2 id="modalTitle">Send Points to User</h2>
+            <form id="transferForm">
+                <input type="hidden" id="targetUsername">
+                <div class="input-group">
+                    <label>Amount (Points)</label>
+                    <div class="input-field">
+                        <i class="ph ph-coins"></i>
+                        <input type="number" id="transferAmount" min="1" required placeholder="Enter amount">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-danger" id="btnWithdraw"><i class="ph ph-arrow-down-right"></i>
+                        Withdraw</button>
+                    <button type="button" class="btn-success" id="btnDeposit"><i class="ph ph-arrow-up-right"></i>
+                        Deposit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Action Successful!</div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
